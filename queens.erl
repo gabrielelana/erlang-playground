@@ -13,7 +13,7 @@ queens(N, AllColumnPositions) -> [
 
 safe(Column, ColumnsAlreadyTaken) -> safe(Column, ColumnsAlreadyTaken, 1).
 
-safe(_Column, [], _Distance) -> true;
+safe(_, [], _) -> true;
 safe(Column, [ColumnTaken|RestOfColumnsTaken], DistanceToColumnTaken) ->
   (Column /= ColumnTaken + DistanceToColumnTaken) and
   (Column /= ColumnTaken - DistanceToColumnTaken) and
