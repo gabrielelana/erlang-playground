@@ -4,9 +4,9 @@
 
 
 mocking(Mod, F) ->
-  mocking(Mod, F, []).
+  mocking(Mod, [], F).
 
-mocking(Mod, F, Options) ->
+mocking(Mod, Options, F) ->
   meck:new(Mod, Options),
   F(),
   ?assert(meck:validate(Mod)),
@@ -67,13 +67,12 @@ when_in_selection_state_and_user_insert_coin_we_remain_in_selection_state_test()
   ).
 
 when_in_selection_state_other_events_are_ignored_test() ->
-  mocking(hw,
+  mocking(hw, [passthrough],
     fun() ->
       ?assertMatch({next_state, selection, []}, coffee_fsm:selection(cancel, [])),
       ?assertMatch({next_state, selection, []}, coffee_fsm:selection(cup_removed, [])),
       was_never_called(hw)
-    end,
-    [passthrough]
+    end
   ).
 
 
