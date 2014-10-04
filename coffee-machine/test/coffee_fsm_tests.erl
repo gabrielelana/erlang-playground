@@ -4,7 +4,10 @@
 
 
 mocking(Mod, F) ->
-  meck:new(Mod),
+  mocking(Mod, F, []).
+
+mocking(Mod, F, Options) ->
+  meck:new(Mod, Options),
   F(),
   ?assert(meck:validate(Mod)),
   meck:unload(Mod).
@@ -30,6 +33,11 @@ was_called_with({Mod, F, Arity}, ArgsPerCall) ->
     end,
     1, ArgsPerCall
   ).
+
+was_never_called({Mod, F, Arity}) ->
+  ?assertEqual(0, meck:num_calls(Mod, F, Arity));
+was_never_called(Mod) ->
+  ?assertEqual(0, length(meck:history(Mod))).
 
 when_in_selection_state_and_user_makes_a_selection_next_state_is_payment_test() ->
   What = something,
@@ -58,23 +66,16 @@ when_in_selection_state_and_user_insert_coin_we_remain_in_selection_state_test()
     end
   ).
 
-% when_in_selection_state_other_events_are_ignored_test() ->
-%     LoopData = [],
-%     meck:new(hw, [passthrough]),
-%     ?assertMatch(
-%        {next_state, selection, LoopData},
-%        ?MODULE:selection(cancel, LoopData)
-%     ),
-%     ?assertMatch(
-%        {next_state, selection, LoopData},
-%        ?MODULE:selection(cup_removed, LoopData)
-%     ),
-%     ?assertEqual(0, meck:num_calls(hw, display, '_')),
-%     ?assertEqual(0, meck:num_calls(hw, return_change, '_')),
-%     ?assertEqual(0, meck:num_calls(hw, drop_cup, '_')),
-%     ?assertEqual(0, meck:num_calls(hw, reboot, '_')),
-%     ?assertEqual(0, meck:num_calls(hw, prepare, '_')),
-%     meck:unload(hw).
+when_in_selection_state_other_events_are_ignored_test() ->
+  mocking(hw,
+    fun() ->
+      ?assertMatch({next_state, selection, []}, coffee_fsm:selection(cancel, [])),
+      ?assertMatch({next_state, selection, []}, coffee_fsm:selection(cup_removed, [])),
+      was_never_called(hw)
+    end,
+    [passthrough]
+  ).
+
 
 % when_in_payment_state_user_inserts_not_enough_coins_we_are_still_in_payment_state_test() ->
 %     What = something,
