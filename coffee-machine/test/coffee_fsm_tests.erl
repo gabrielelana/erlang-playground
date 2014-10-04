@@ -44,40 +44,19 @@ when_in_selection_state_and_user_makes_a_selection_next_state_is_payment_test() 
       was_called_once_with(Display, ["Please pay: ~w", [Price]])
     end
   ).
-  % meck:new(hw),
-  % meck:expect(hw, display, 2, nil),
-  % % meck:expect(hw, display,
-  % %   fun(Msg, Args) ->
-  % %     ?assertEqual("Please pay: ~w", Msg),
-  % %     ?assertEqual([100], Args)
-  % %   end
-  % % ),
-  % ?assertMatch(
-  %    {next_state, payment, {What, Price, 0}},
-  %    coffee_fsm:selection({selection, What, Price}, [])
-  % ),
-  % ?assert(meck:validate(hw)),
-  % ?assertEqual("Please pay: ~w", meck:capture(first, hw, display, 2, 1)),
-  % ?assertEqual([Price], meck:capture(first, hw, display, 2, 2)),
-  % meck:unload(hw).
 
-% when_in_selection_state_and_user_insert_coin_we_remain_in_selection_state_test() ->
-%     LoopData = [],
-%     meck:new(hw),
-%     meck:expect(
-%       hw,
-%       return_change,
-%       fun(Change) ->
-%               ?assertEqual(100, Change)
-%       end
-%     ),
-%     ?assertMatch(
-%        {next_state, selection, LoopData},
-%        ?MODULE:selection({pay, 100}, LoopData)
-%     ),
-%     ?assert(meck:validate(hw)),
-%     ?assertEqual(1, meck:num_calls(hw, return_change, 1)),
-%     meck:unload(hw).
+when_in_selection_state_and_user_insert_coin_we_remain_in_selection_state_test() ->
+  Coin = 100,
+  mocking(hw,
+    fun() ->
+      Change = spy_on(hw, return_change, 1),
+      ?assertMatch(
+         {next_state, selection, []},
+         coffee_fsm:selection({pay, Coin}, [])
+      ),
+      was_called_once_with(Change, [Coin])
+    end
+  ).
 
 % when_in_selection_state_other_events_are_ignored_test() ->
 %     LoopData = [],
