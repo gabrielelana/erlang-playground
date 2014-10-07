@@ -76,28 +76,23 @@ when_in_selection_state_other_events_are_ignored_test() ->
   ).
 
 
-% when_in_payment_state_user_inserts_not_enough_coins_we_are_still_in_payment_state_test() ->
-%     What = something,
-%     Price = 100,
-%     Payed = 0,
-%     Inserted = 10,
-%     ExpectedToBeInserted = Payed + Inserted,
-%     meck:new(hw),
-%     meck:expect(
-%       hw,
-%       display,
-%       fun(Msg, Args) ->
-%               ?assertEqual("Please pay: ~w", Msg),
-%               ?assertEqual([90], Args)
-%       end
-%     ),
-%     ?assertMatch(
-%        {next_state, payment, {What, Price, ExpectedToBeInserted}},
-%        ?MODULE:payment({pay, Inserted}, {What, Price, Payed})
-%     ),
-%     ?assert(meck:validate(hw)),
-%     ?assertEqual(1, meck:num_calls(hw, display, 2)),
-%     meck:unload(hw).
+when_in_payment_state_user_inserts_not_enough_coins_we_are_still_in_payment_state_test() ->
+  mocking(hw,
+    fun() ->
+      What = something,
+      Price = 100,
+      PayedBefore = 0,
+      CoinInserted = 10,
+      PayedAfter = PayedBefore + CoinInserted,
+
+      Display = spy_on(hw, display, 2),
+      ?assertMatch(
+         {next_state, payment, {What, Price, PayedAfter}},
+         coffee_fsm:payment({pay, CoinInserted}, {What, Price, PayedBefore})
+      ),
+      was_called_once_with(Display, ["Please pay: ~w", [Price - CoinInserted]])
+    end
+  ).
 
 % when_in_payment_state_user_inserts_enough_coins_we_go_into_the_remove_state_test() ->
 %     What = something,
